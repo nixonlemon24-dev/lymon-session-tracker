@@ -1,0 +1,114 @@
+/* ── RatesModal.css ───────────────────────────────────────────
+   Extends AddMemberModal.css — only rates-specific overrides here.
+   Make sure AddMemberModal.css is also imported in RatesModal.jsx.
+──────────────────────────────────────────────────────────────── */
+
+/* wider modal for multi-package layout */
+.rm-modal {
+  max-width: 600px;
+}
+
+/* ── package block ────────────────────────────────── */
+.rm-pkg-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.2s;
+}
+
+.rm-pkg-block:hover {
+  border-color: rgba(202, 255, 0, 0.15);
+}
+
+/* ── block header ─────────────────────────────────── */
+.rm-pkg-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rm-pkg-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.rm-pkg-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rm-pkg-block-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rm-pkg-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #334155;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rm-remove-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.06);
+  color: #f87171;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.rm-remove-btn:hover {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+/* ── add package button ───────────────────────────── */
+.rm-add-pkg-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: 1px dashed rgba(202, 255, 0, 0.25);
+  background: rgba(202, 255, 0, 0.03);
+  color: #caff00;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.rm-add-pkg-btn:hover {
+  background: rgba(202, 255, 0, 0.07);
+  border-color: rgba(202, 255, 0, 0.45);
+  transform: translateY(-1px);
+}
+
+.rm-add-pkg-btn:active {
+  transform: translateY(0);
+}
