@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAction, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import "../css/Login.css";
-import { IconEmail, IconLock, IconAlert } from "../components/icons";
+// import { IconEmail, IconLock, IconAlert } from "../components/icons";
 import Logo from "../css/images/Logo.png";
 
 async function hashPassword(password) {
