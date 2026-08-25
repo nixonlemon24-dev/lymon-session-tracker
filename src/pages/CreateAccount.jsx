@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import "../css/Login.css";
-import { IconEmail, IconLock, IconEyeOpen, IconEyeClosed, IconAlert} from "../components/icons";
+import { IconEmail, IconLock, IconEyeOpen, IconEyeClosed, IconAlert} from "../components/Icons";
 import Logo from "../css/images/Logo.png";
 
 // Lightweight client-side hash (swap for bcrypt on a Node action for production)
