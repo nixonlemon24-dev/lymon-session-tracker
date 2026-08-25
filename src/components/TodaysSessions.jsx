@@ -24,14 +24,8 @@ export default function TodaysSessions({ userEmail }) {
     month: "long", day: "numeric", year: "numeric"
   });
 
-  const sessionPkgNames = new Set(
-    packages.filter(p => p.type === "Session-based").map(p => p.packageName)
-  );
-
-  const active = members.filter(m =>
-    sessionPkgNames.has(m.package) &&
-    (m.sessionsLeft > 0 || m.lastCheckIn === today)
-  );
+  const sessionPkgNames = new Set(packages.filter(p => p.type === "Session-based").map(p => p.packageName));
+  const active = members.filter(m =>sessionPkgNames.has(m.package) && (m.sessionsLeft > 0 || m.lastCheckIn === today));
 
   const filtered = active.filter(m => {
     const q = search.toLowerCase().trim();

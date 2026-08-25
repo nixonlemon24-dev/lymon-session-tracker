@@ -98,7 +98,7 @@ export default function Login() {
         <div className="brand-panel">
           <div className="logo-mark">
             <img src={Logo} alt="Session Tracker Logo" className="logo-img" />
-            <div lassName="logo-container">
+            <div className="logo-container">
               <div className="logo-text"> Session<br/>Tracker</div>
               <div className="logo-sub">A Smart Assistant for Trainers &amp; Coaches</div>
             </div>

@@ -39,7 +39,7 @@ export default function PackagesList({ userEmail }) {
       </div>
     );
   }
-// style={{ color: "red", fontSize: "13px", padding: "8px 16px", marginBottom: "8px" }}
+
   return (
     <div className="rates-list">
       {error && (
