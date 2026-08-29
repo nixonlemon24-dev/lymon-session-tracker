@@ -270,7 +270,40 @@ const validate = () => {
                   
                   </div>
                 </div>
-              </div>
+                
+              {/* IF Type = Session */}
+              {/* {pkg.type === "Session-based" && (
+                <div className="modal-row">
+                  <div className="modal-field">
+                    <label className="modal-label">Expiry Type</label>
+                    <select
+                      className="modal-input modal-select"
+                      value={pkg.type}
+                      onChange={e => set(pkg.id, "type", e.target.value)}
+                    >
+                  {TYPES.filter(t => t !== "Session-based").map(t => (
+                  <option key={t}>{t}</option>
+                  ))}
+                    </select>
+                  </div>
+                  <div className={`modal-field ${errors[`${pkg.id}-sessions`] ? "modal-field--error" : ""}`}>
+                  <label className="modal-label"> Expiry Date / Duration</label>
+                    <input
+                      className="modal-input"
+                      type="number"
+                      min="1"
+                      placeholder={
+                        pkg.type === "Monthly (days)"  ? "1"  :
+                        pkg.type === "Yearly (months)" ? "1"  : "15"
+                      }
+                      value={pkg.sessionExpiry}
+                      onChange={e => set(pkg.id, "sessionExpiry", e.target.value)}
+                    />
+                  
+                  </div>
+                </div>
+              )} */}
+              </div>            
             ))
           )}
 

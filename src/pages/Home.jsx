@@ -1,5 +1,5 @@
-//NPM
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+//NPM useRef, useCallback, useMemo
+import { useState,  useEffect } from 'react';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
@@ -22,7 +22,7 @@ export default function Home() {
   // Query states
   // const [userEmail, setUserEmail] = useState('');
   // const [members, setMembers] = useState([]);
-  const [status, setStatus] = useState([]);
+  // const [status, setStatus] = useState([]);
   const [sidebarOpen,    setSidebarOpen]    = useState(false);
   const [activeFilter,   setActiveFilter]   = useState("All");
   const [showAddMember, setShowAddMember] = useState(false);
@@ -78,7 +78,7 @@ export default function Home() {
 
 
 const formatRevenue = (amount) =>
-  amount >= 1000 ? `₱${(amount / 1000).toFixed(0)}K` : `₱${amount.toLocaleString()}`;
+  amount >= 1000 ? `$${(amount / 1000).toFixed(0)}K` : `$${amount.toLocaleString()}`;
 
   return (
     <div>

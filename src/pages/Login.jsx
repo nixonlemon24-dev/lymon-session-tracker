@@ -122,7 +122,7 @@ export default function Login() {
         <div className="login-panel">
 
           <div className="login-header">
-            <h1>Welcome back 👋</h1>
+            <h1>Welcome back!!</h1>
             <p>Sign in to your trainer dashboard</p>
           </div>
 

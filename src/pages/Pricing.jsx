@@ -4,9 +4,9 @@ import { api } from "../../convex/_generated/api";
 
 const plans = [
   {
-    name: "Free",
+    name: "Free Trial",
     price: "$0",
-    period: "forever",
+    period: "14 Days",
     badge: null,
     desc: "Perfect for solo coaches just getting started.",
     color: "#888",
@@ -26,7 +26,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$4.99",
+    price: "$10",
     period: "/ month",
     badge: "MOST POPULAR",
     desc: "For serious coaches ready to scale their business.",
@@ -48,7 +48,7 @@ const plans = [
   },
   {
     name: "Not Yet Available",
-    price: "$9.99",
+    price: "$20",
     period: "/ month",
     badge: "FOR TEAMS",
     desc: "More Functionality Comming Soon",

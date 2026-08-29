@@ -204,8 +204,7 @@ export const getExpiringSoonCount = query({
     const in7DaysStr = in7Days.toISOString().split("T")[0];
 
     return members.filter(m => {
-      // session-based: 5 or fewer sessions left
-      if (!m.endDate && m.sessionsLeft > 0 && m.sessionsLeft <= 5) return true;
+      if (!m.endDate && m.sessionsLeft > 0 && m.sessionsLeft <= 1) return true;
       // monthly: endDate within next 7 days
       if (m.endDate && m.endDate >= todayStr && m.endDate <= in7DaysStr) return true;
       return false;

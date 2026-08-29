@@ -1,6 +1,27 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { internalMutation } from "./_generated/server";
+
+// export const newPackage = mutation({
+//   args: {
+//     userEmail:   v.string(),
+//     packageName: v.string(),
+//     price:       v.number(),
+//     type:        v.string(),
+//     sessions:    v.number(), // duration value OR session count, depending on type
+//   },
+//   handler: async (ctx, args) => {
+//     const sessionExpiry = computeExpiryDate(args.type, args.sessions);
+
+//     const id = await ctx.db.insert("packages", {
+//       ...args,
+//       sessionExpiry, // "" for Session-based, a real date for Monthly/Yearly
+//       createdAt: Date.now(),
+//     });
+//     return id;
+//   },
+// });
 
 export const newPackage = mutation({
   args: {
@@ -9,6 +30,7 @@ export const newPackage = mutation({
     price:       v.number(),
     type:        v.string(),
     sessions:    v.number(),
+    sessionExpiry: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
   const id = await ctx.db.insert("packages", {
@@ -37,6 +59,7 @@ export const updatePackage = mutation({
     price:       v.number(),
     type:        v.string(),
     sessions:    v.number(),
+    sessionExpiry: v.optional(v.string()),
   },
   handler: async (ctx, { id, ...rest }) => {
     await ctx.db.patch(id, { ...rest });
@@ -72,3 +95,30 @@ export const deletePackage = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+// function computeExpiryDate(type: string, value: number): string {
+//   const today = new Date();
+
+//   if (type === "Monthly (days)") {
+//     today.setMonth(today.getMonth() + value);
+//   } else if (type === "Yearly (months)") {
+//     today.setFullYear(today.getFullYear() + value);
+//   } else {
+//     // Session-based — no calendar expiry, sessions run out based on usage
+//     return "";
+//   }
+
+//   return today.toISOString().split("T")[0]; // "YYYY-MM-DD"
+// }
+
+
+// export const removeSessionExpiryField = internalMutation({
+//   handler: async (ctx) => {
+//     const packages = await ctx.db.query("packages").collect();
+//     for (const pkg of packages) {
+//       if ("sessionExpiry" in pkg) {
+//         await ctx.db.patch(pkg._id, { sessionExpiry: undefined });
+//       }
+//     }
+//   },
+// });

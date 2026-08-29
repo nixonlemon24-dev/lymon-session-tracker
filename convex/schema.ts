@@ -43,6 +43,7 @@ packages: defineTable({
   type:        v.string(),
   sessions:    v.number(),
   createdAt:   v.number(),
+  sessionExpiry: v.optional(v.string()),
 }),
 });
 
