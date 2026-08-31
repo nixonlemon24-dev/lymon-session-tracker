@@ -18,10 +18,12 @@
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.1",
     "resend": "^6.12.3",
+    "stripe": "^22.6.0",
     "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^26.4.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.1.0",

@@ -8,7 +8,10 @@ export default defineSchema({
     passwordHash: v.string(),
     createdAt: v.number(),
       plan:         v.optional(v.string()), // "free" | "pro" | "business"
-  }).index("by_email", ["email"]),
+      planStatus:        v.optional(v.string()), // "active" | "trialing" | "past_due" | "canceled"
+      stripeCustomerId:  v.optional(v.string()),
+  }).index("by_email", ["email"])
+    .index("by_stripeCustomerId", ["stripeCustomerId"]),
     passwordResets: defineTable({
     email: v.string(),
     otp: v.string(),
@@ -45,5 +48,13 @@ packages: defineTable({
   createdAt:   v.number(),
   sessionExpiry: v.optional(v.string()),
 }),
+subscriptions: defineTable({
+  userId:                v.id("users"),
+  stripeCustomerId:      v.string(),
+  stripeSubscriptionId:  v.string(),
+  stripePriceId:         v.string(),
+  status:                v.string(), // mirrors Stripe's subscription.status
+  currentPeriodEnd:      v.number(), // unix seconds
+}).index("by_userId", ["userId"])
+  .index("by_stripeSubscriptionId", ["stripeSubscriptionId"]),
 });
-

@@ -35,7 +35,7 @@ export default function NavBar() {
 
         <div className="nav-cta nav-cta-desktop">
           <Link to="/login" className="link">Sign in</Link>
-          <a href="#pricing" className="btn btn-lime">Start free trial</a>
+          <Link to="/create-account" className="btn btn-lime">Start free trial</Link>
         </div>
 
         {/* Hamburger menu button for mobile */}
@@ -74,7 +74,7 @@ export default function NavBar() {
 
         <div className="nav-overlay-cta">
           <Link to="/login" className="link" onClick={closeMenu}>Sign in</Link>
-          <a href="#pricing" className="btn btn-lime" onClick={closeMenu}>Start free trial</a>
+          <Link to="/create-account" className="btn btn-lime" onClick={closeMenu}>Start free trial</Link>
         </div>
       </div>
     </nav>

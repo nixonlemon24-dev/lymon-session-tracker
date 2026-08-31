@@ -28,14 +28,25 @@ export default function Home() {
   const [showAddMember, setShowAddMember] = useState(false);
   const [showAddPackage, setShowAddPackage] = useState(false);
   const [activePage, setActivePage] = useState("Dashboard");
-
+   const [showSuccess, setShowSuccess] = useState(false);
   //Session 
   const token =localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
 
   // Redirect if no token
   useEffect(() => {if (!token) window.location.href = "/"; }, [token]);
 
-
+ 
+    useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("checkout") === "success") {
+        setShowSuccess(true);
+        // clean the URL so refreshing doesn't re-trigger the banner
+        window.history.replaceState({}, "", window.location.pathname);
+        // auto-dismiss after a few seconds
+        const timer = setTimeout(() => setShowSuccess(false), 5000);
+        return () => clearTimeout(timer);
+      }
+    }, []);
 
   // Get session from Convex (reactive)
   const session = useQuery(api.users.getSession, token ? { token } : "skip");
@@ -117,8 +128,15 @@ const formatRevenue = (amount) =>
           <div className="page-title">{activePage}</div>
         </header>
 
-        {activePage === "Dashboard"       && (
-          <div className="content">
+              {activePage === "Dashboard"       && (
+                <div className="content">
+
+                      {showSuccess && (
+              <div className="success-banner">
+                🎉 You're now on the Pro plan! Enjoy your new features.
+              </div>
+            )}
+            
             {/* stats grid */}
             <div className="stats-grid">
               <div className="stat-card">

@@ -12,6 +12,8 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as members from "../members.js";
 import type * as packages from "../packages.js";
+import type * as stripe from "../stripe.js";
+import type * as stripeHelpers from "../stripeHelpers.js";
 import type * as users from "../users.js";
 
 import type {
@@ -25,6 +27,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   members: typeof members;
   packages: typeof packages;
+  stripe: typeof stripe;
+  stripeHelpers: typeof stripeHelpers;
   users: typeof users;
 }>;
 

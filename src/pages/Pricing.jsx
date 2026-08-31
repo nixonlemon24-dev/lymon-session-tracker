@@ -1,100 +1,135 @@
 import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
-const plans = [
+const PLANS = [
   {
-    name: "Free Trial",
-    price: "$0",
-    period: "14 Days",
-    badge: null,
-    desc: "Perfect for solo coaches just getting started.",
-    color: "#888",
-    accent: "rgba(255,255,255,0.08)",
-    features: [
-      { text: "1 coach account",           included: true  },
-      { text: "Up to 10 members",          included: true  },
-      { text: "Session check-in tracking", included: true  },
-      { text: "Basic Dashboard overview",  included: true  },
-      { text: "Unlimited members",         included: false },
-      { text: "SMS/email reminders",       included: false },
-      { text: "Revenue analytics",         included: false },
-      // { text: "Priority support",          included: false },
-    ],
-    cta: "Get Started Free",
-    ctaStyle: "ghost",
-  },
-  {
-    name: "Pro",
-    price: "$10",
-    period: "/ month",
-    badge: "MOST POPULAR",
-    desc: "For serious coaches ready to scale their business.",
-    color: "#ccff00",
-    accent: "rgba(204,255,0,0.06)",
-    features: [
-      { text: "1 coach account",           included: true },
-      { text: "Unlimited members",         included: true },
+    tag: 'Starter',
+    name: 'Free Trial',
+    desc: 'For independent trainers just getting off spreadsheets.',
+    price: '$0',
+    period: '/ 14 Days',
+    planKey: 'free',
+    perks: [
+      { text: "1 coach account", included: true },
+      { text: "Up to 10 members", included: true },
       { text: "Session check-in tracking", included: true },
-      { text: "Full Dashboard overview",   included: true },
-      { text: "SMS/email reminders",       included: true },
-      { text: "Revenue analytics",         included: false },
-      // { text: "Export reports (PDF/Excel)",included: true },
-      // { text: "Multiple staff accounts",   included: false },
-      // { text: "Priority support",          included: false },
+      { text: "Basic Dashboard overview", included: true },
+      { text: "Unlimited members", included: false },
+      { text: "SMS/email reminders", included: false },
+      { text: "Revenue analytics", included: false },
     ],
-    cta: "Start Pro",
-    ctaStyle: "primary",
+    cta: 'Start free',
+    featured: false,
   },
   {
-    name: "Not Yet Available",
-    price: "$20",
-    period: "/ month",
-    badge: "FOR TEAMS",
-    desc: "More Functionality Comming Soon",
-    color: "#60a5fa",
-    accent: "rgba(96,165,250,0.06)",
-    features: [
-      { text: "Multiple coaches/staff",    included: false },
-      { text: "Unlimited members",         included: false },
-      { text: "Session check-in tracking", included: false },
-      { text: "All Pro features",included: false },
-      { text: "SMS/email reminders",        included: false },
-      { text: "More Features",        included: false },
-      // { text: "",         included: true },
-      // { text: "Export reports (PDF/Excel)",included: true },
-      // { text: "Multiple staff accounts",   included: true },
-      // { text: "Priority support",          included: true },
+    tag: 'Most popular',
+    name: 'Pro Coach',
+    desc: 'For trainers running a full client roster.',
+    price: '$10',
+    period: '/month',
+    planKey: 'pro',
+    perks: [
+      { text: "1 coach account", included: true },
+      { text: "Unlimited members", included: true },
+      { text: "Session check-in tracking", included: true },
+      { text: "Full Dashboard overview", included: true },
+      { text: "SMS/email reminders", included: true },
+      { text: "Revenue analytics", included: false },
     ],
-    cta: "Not Yet Available",
-    ctaStyle: "ghost",
+    cta: 'Start free trial',
+    featured: true,
   },
-];
+  {
+    tag: 'FOR TEAMS',
+    name: 'Not Yet Available',
+    desc: 'More Functionality Comming Soon',
+    price: '$20',
+    period: '/month',
+    planKey: 'business',
+    perks: [
+      { text: "Multiple coaches/staff", included: false },
+      { text: "Unlimited members", included: false },
+      { text: "Session check-in tracking", included: false },
+      { text: "All Pro features", included: false },
+      { text: "SMS/email reminders", included: false },
+      { text: "More Features", included: false },
+    ],
+    cta: 'Not Yet Available',
+    featured: false,
+  },
+]
 
 export default function PricingPage({ userEmail }) {
-  const [hovered, setHovered] = useState(null);
+  const [loadingPlan, setLoadingPlan] = useState(null);
+  const [error, setError] = useState(null);
 
-  // fetch user to get their current plan
   const user = useQuery(
     api.users.getUserByEmail,
     userEmail ? { email: userEmail } : "skip"
   );
 
-  // default to "free" if no plan stored yet
-  const currentPlan = user?.plan ?? "free";
+  const createCheckoutSession = useAction(api.stripe.createCheckoutSession);
+  const createPortalSession = useAction(api.stripe.createPortalSession);
 
+  const currentPlan = user?.plan ?? "free";
   const isCurrentPlan = (planKey) => currentPlan === planKey;
 
-  const getCtaLabel = (plan) => {
-    if (isCurrentPlan(plan.planKey)) return "✓ Current Plan";
-    if (plan.planKey === "business") return "Not Yet Available";
-    return plan.cta;
-  };
+  async function handleCtaClick(plan) {
+    setError(null);
 
-  const getCtaStyle = (plan) => {
-    if (isCurrentPlan(plan.planKey)) return "current";
-    return plan.ctaStyle;
-  };
+    // Business tier isn't live yet
+    if (plan.planKey === "business") return;
+
+    // Already on this plan -> send them to the billing portal instead
+    if (isCurrentPlan(plan.planKey) && user?.stripeCustomerId) {
+      try {
+        setLoadingPlan(plan.planKey);
+        const { url } = await createPortalSession({
+          stripeCustomerId: user.stripeCustomerId,
+        });
+        if (url) window.location.href = url;
+      } catch (err) {
+        console.error(err);
+        setError("Couldn't open the billing portal. Please try again.");
+      } finally {
+        setLoadingPlan(null);
+      }
+      return;
+    }
+
+    // Free plan needs no payment, handle sign-up however you already do
+    if (plan.planKey === "free") {
+      window.location.href = "/signup";
+      return;
+    }
+
+    if (!userEmail) {
+      setError("Please log in first to start a subscription.");
+      return;
+    }
+
+    try {
+      setLoadingPlan(plan.planKey);
+      const { url } = await createCheckoutSession({
+        planKey: plan.planKey,
+        email: userEmail,
+      });
+      if (url) window.location.href = url;
+    } catch (err) {
+      console.error(err);
+      setError("Couldn't start checkout. Please try again in a moment.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  }
+
+  function ctaLabel(plan) {
+    if (plan.planKey === "business") return plan.cta;
+    if (isCurrentPlan(plan.planKey)) return "Manage plan";
+    if (loadingPlan === plan.planKey) return "Loading…";
+    return plan.cta;
+  }
 
   return (
     <div className="pricing-page">
@@ -115,58 +150,47 @@ export default function PricingPage({ userEmail }) {
             </span>
           </div>
         )}
+        {error && (
+          <div className="pricing-error" style={{ color: "#ff5c5c", marginTop: 8 }}>
+            {error}
+          </div>
+        )}
       </div>
 
-      <div className="pricing-grid">
-        {plans.map((plan, i) => (
-          <div
-            key={plan.name}
-            className={`pricing-card ${plan.ctaStyle === "primary" ? "pricing-card--featured" : ""} ${isCurrentPlan(plan.planKey) ? "pricing-card--current" : ""}`}
-            style={{ background: hovered === i ? plan.accent : "transparent" }}
-            onMouseEnter={() => setHovered(i)}
-            onMouseLeave={() => setHovered(null)}
-          >
-            {plan.badge && (
-              <div className="pricing-badge" style={{ color: plan.color, borderColor: plan.color }}>
-                {plan.badge}
+      <div className="wrap">
+        <div className="price-grid">
+          {PLANS.map((p) => {
+            const disabled = p.planKey === "business" || loadingPlan === p.planKey;
+            return (
+              <div className={`price-card${p.featured ? ' feat' : ''}`} key={p.name}>
+                <div className="price-tag">{p.tag}</div>
+                <div className="price-name">{p.name}</div>
+                <div className="price-desc">{p.desc}</div>
+                <div className="price-amt">
+                  {p.price}
+                  <span>{p.period}</span>
+                </div>
+                <ul className="price-list">
+                  {p.perks.map((perk, i) => (
+                    <li key={i} className={perk.included ? "perk-yes" : "perk-no"}>
+                      <span className="perk-icon">{perk.included ? "✓" : "✗"}</span>
+                      {perk.text}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => handleCtaClick(p)}
+                  className={`btn btn-block ${p.featured ? 'btn-lime' : 'btn-ghost'}`}
+                  style={disabled ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
+                >
+                  {ctaLabel(p)}
+                </button>
               </div>
-            )}
-
-            <div className="pricing-plan-name" style={{ color: plan.color }}>
-              {plan.name}
-            </div>
-
-            <div className="pricing-price-row">
-              <span className="pricing-price">{plan.price}</span>
-              <span className="pricing-period">{plan.period}</span>
-            </div>
-
-            <p className="pricing-desc">{plan.desc}</p>
-
-            <div className="pricing-divider" />
-
-            <ul className="pricing-features">
-              {plan.features.map((f, fi) => (
-                <li key={fi} className={`pricing-feature ${f.included ? "included" : "excluded"}`}>
-                  <span className="feature-icon">
-                    {f.included ? "✓" : "✕"}
-                  </span>
-                  {f.text}
-                </li>
-              ))}
-            </ul>
-
-            <button
-              className={`pricing-cta pricing-cta--${getCtaStyle(plan)}`}
-              style={plan.ctaStyle === "primary" && !isCurrentPlan(plan.planKey)
-                ? { background: plan.color, color: "#000" }
-                : {}}
-              disabled={isCurrentPlan(plan.planKey) || plan.planKey === "business"}
-            >
-              {getCtaLabel(plan)}
-            </button>
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
 
       <div className="pricing-footnote">

@@ -165,7 +165,7 @@ export default function Funnel() {
               dashboard built for trainers who'd rather coach than do paperwork.
             </p>
             <div className="hero-actions">
-              <a href="#pricing" className="btn btn-lime btn-lg">Start your free 14-day trial</a>
+              <Link to="/create-account" className="btn btn-lime btn-lg">Start your free 14-day trial</Link>
               <a href="#how" className="btn btn-ghost btn-lg">See how it works</a>
             </div>
             <div className="hero-note">No credit card required &middot; Set up your first client in under 5 minutes</div>
@@ -325,9 +325,9 @@ export default function Funnel() {
                     </li>
                   ))}
                 </ul>
-                <a href="#" className={`btn btn-block ${p.featured ? 'btn-lime' : 'btn-ghost'}`}>
+                <Link to="/create-account" className={`btn btn-block ${p.featured ? 'btn-lime' : 'btn-ghost'}`}>
                   {p.cta}
-                </a>
+                </Link>
               </div>
             ))}
           </div>
@@ -341,8 +341,8 @@ export default function Funnel() {
             <h2>Your next session is already waiting.</h2>
             <p>Start tracking it properly &mdash; free for 14 days, no card required.</p>
             <div className="hero-actions">
-              <a href="#pricing" className="btn btn-lime btn-lg">Start your free trial</a>
-              <a href="#" className="btn btn-ghost btn-lg">Book a demo</a>
+              <Link to="/create-account" className="btn btn-lime btn-lg">Start your free trial</Link>
+              <Link to="/book-demo" className="btn btn-ghost btn-lg">Book a demo</Link>
             </div>
           </div>
         </div>
