@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useConvexAuth } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import "../css/Login.css";
-import { IconEmail, IconLock, IconEyeOpen, IconEyeClosed, IconAlert} from "../components/Icons";
+import { IconEmail, IconLock, IconEyeOpen, IconEyeClosed, IconAlert, IconGoogle } from "../components/Icons";
 import Logo from "../css/images/Logo.png";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 // Lightweight client-side hash (swap for bcrypt on a Node action for production)
 async function hashPassword(password) {
@@ -24,6 +25,8 @@ function validatePassword(password) {
   return null;
 }
 
+
+
 export default function CreateAccount() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -31,8 +34,28 @@ export default function CreateAccount() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState("");
   const [success, setSuccess]   = useState(false);
-
+  const { signIn } = useAuthActions();
   const createAccountMutation = useMutation(api.users.createAccount);
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
+
+// const loginWithGoogle = useCallback(async (provider) => {
+//   try {
+//     sessionStorage.setItem("oauth_redirect_pending", "1");
+//        await signIn(provider, { redirectTo: "/Dashboard" });
+//   } catch (err) {
+//     sessionStorage.removeItem("oauth_redirect_pending");
+//     setError(err.message ?? "Google sign-in failed. Please try again.");
+//   }
+// }, [signIn]);
+
+const loginWithGoogle = useCallback(async (provider) => {
+  try {
+    await signIn(provider, { redirectTo: "/dashboard" }); // note: lowercase, see below
+  } catch (err) {
+    setError(err.message ?? "Google sign-in failed. Please try again.");
+  }
+}, [signIn]);
 
   const handleCreateAccount = useCallback(async () => {
     setError("");
@@ -85,6 +108,15 @@ export default function CreateAccount() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [handleCreateAccount]);
 
+  // useEffect(() => {
+  //   const pending = sessionStorage.getItem("oauth_redirect_pending");
+  //   if (!pending || isLoading || !isAuthenticated) return;
+  //   // No sessionToken bridging needed — Dashboard reads Google users
+  //   // directly via the reactive currentUser query (Convex Auth identity).
+  //   sessionStorage.removeItem("oauth_redirect_pending");
+  //   window.location.href = "/dashboard";
+  // }, [isLoading, isAuthenticated]);
+
   if (success) {
     return (
       <div className="login-page">
@@ -100,6 +132,8 @@ export default function CreateAccount() {
       </div>
     );
   }
+
+  
 
   return (
     <div className="login-page">
@@ -190,6 +224,11 @@ export default function CreateAccount() {
           >
             <span className="btn-label">Create account</span>
             <div className="spinner" />
+          </button>
+
+          {/* Google button */}
+          <button className="btn-ghost" type="button" onClick={() => loginWithGoogle("google")}>
+            <IconGoogle /> Create Account with Google
           </button>
 
           <p className="login-footer-link">

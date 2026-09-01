@@ -5,7 +5,9 @@ import "../css/Login.css";
 import { IconEmail, IconLock, IconEyeOpen, IconEyeClosed, IconAlert, IconGoogle } from '../components/Icons';
 import Logo from "../css/images/Logo.png";
 import { Link } from "react-router-dom";
-import { useAuthActions } from "@convex-dev/auth/react";
+import { useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
+
+
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -19,6 +21,7 @@ function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+
 export default function Login() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +29,7 @@ export default function Login() {
   const [showPw, setShowPw]     = useState(false);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState("");
+  const { isAuthenticated } = useConvexAuth();
 
   const loginUser = useMutation(api.users.loginUser);
   const { signIn } = useAuthActions();
@@ -86,6 +90,33 @@ export default function Login() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [handleLogin]);
 
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      await signIn("google");
+    } catch (err) {
+      setError(err.message ?? "Google sign-in failed. Please try again.");
+    }
+  }, [signIn]);
+
+    // const handleGoogleSignIn = useCallback(async () => {
+    //   try {
+    //     sessionStorage.setItem("oauth_redirect_pending", "1");
+    //     await signIn("google");
+    //   } catch (err) {
+    //     sessionStorage.removeItem("oauth_redirect_pending");
+    //     setError(err.message ?? "Google sign-in failed. Please try again.");
+    //   }
+    // }, [signIn]);
+
+    // useEffect(() => {
+    //   const pending = sessionStorage.getItem("oauth_redirect_pending");
+    //   if (!pending || !isAuthenticated) return;
+    //   // No sessionToken bridging needed — Dashboard reads Google users
+    //   // directly via the reactive currentUser query (Convex Auth identity).
+    //   sessionStorage.removeItem("oauth_redirect_pending");
+    //   window.location.href = "/dashboard";
+    // }, [isAuthenticated]);
+  
   return (
     <div className="login-page">
       {/* Background glow orbs */}
@@ -200,7 +231,7 @@ export default function Login() {
           <div className="divider">or continue with</div>
 
           {/* Google button */}
-          <button className="btn-ghost" type="button" onClick={() => signIn("google")}>
+          <button className="btn-ghost" type="button" onClick={handleGoogleSignIn}>
             <IconGoogle /> Sign in with Google
           </button>
           

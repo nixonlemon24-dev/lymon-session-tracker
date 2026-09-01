@@ -14,7 +14,7 @@ export const createAccount = mutation({
     // Check if email already exists
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("email", (q) => q.eq("email", email))
       .unique();
 
     if (existing) {
@@ -40,7 +40,7 @@ export const loginUser = mutation({
   handler: async (ctx, { email, passwordHash }) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("email", (q) => q.eq("email", email))
       .unique();
 
     if (!user) throw new Error("No account found with this email");
@@ -129,7 +129,7 @@ export const getUserByEmail = query({
   handler: async (ctx, { email }) => {
     return await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("email", (q) => q.eq("email", email))
       .unique();
   },
 });
@@ -171,7 +171,7 @@ export const verifyOTPAndReset = mutation({
     // Update password
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("email", (q) => q.eq("email", email))
       .unique();
     if (!user) throw new Error("User not found.");
 
@@ -189,5 +189,42 @@ export const currentUser = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
     return await ctx.db.get(userId);
+  },
+});
+
+// Bridges a Convex Auth session (e.g. after Google sign-in) into your
+// custom sessions table, so getSession(token) works the same way for
+// Google users as it does for email/password users. Call this once,
+// right after useConvexAuth().isAuthenticated flips to true.
+export const createSessionForCurrentUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated.");
+
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found.");
+
+    // Reuse an existing, still-valid session for this user instead of
+    // minting a new row every time this runs (e.g. on refresh).
+    const existing = await ctx.db
+      .query("sessions")
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+    if (existing && existing.expiresAt > Date.now()) {
+      return { token: existing.token, email: user.email };
+    }
+
+    const token = uuidv4();
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+
+    await ctx.db.insert("sessions", {
+      token,
+      userId: user._id,
+      email: user.email,
+      expiresAt,
+    });
+
+    return { token, email: user.email };
   },
 });

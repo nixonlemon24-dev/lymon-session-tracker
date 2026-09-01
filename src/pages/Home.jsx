@@ -1,7 +1,8 @@
 //NPM useRef, useCallback, useMemo
-import { useState,  useEffect } from 'react';
+import { useState,  useEffect, useCallback } from 'react';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+
 
 
 //Components
@@ -17,32 +18,50 @@ import MembersPage  from "../pages/Members";
 import SessionsPage from "../pages/Sessions";
 import PackagesPage from "../pages/Packages";
 import PricingPage from "../pages/Pricing";
+import { useConvexAuth, useAuthActions } from "@convex-dev/auth/react";
 
 export default function Home() {
-  // Query states
-  // const [userEmail, setUserEmail] = useState('');
-  // const [members, setMembers] = useState([]);
-  // const [status, setStatus] = useState([]);
   const [sidebarOpen,    setSidebarOpen]    = useState(false);
   const [activeFilter,   setActiveFilter]   = useState("All");
   const [showAddMember, setShowAddMember] = useState(false);
   const [showAddPackage, setShowAddPackage] = useState(false);
   const [activePage, setActivePage] = useState("Dashboard");
-   const [showSuccess, setShowSuccess] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   //Session 
   const token =localStorage.getItem("sessionToken") || sessionStorage.getItem("sessionToken");
+  const { isAuthenticated, isLoading } = useConvexAuth();   
+  const { signOut } = useAuthActions();
+  // const location = useLocation();
+  useEffect(() => {
+  if (isLoading) return; // wait for Convex Auth to resolve first
+  const loggedIn = isAuthenticated || !!token;
+  if (!loggedIn) {
+    window.location.href = "/";
+  }
+}, [isLoading, isAuthenticated, token]);
 
-  // Redirect if no token
-  useEffect(() => {if (!token) window.location.href = "/"; }, [token]);
+const handleLogout = useCallback(async () => {
+  localStorage.removeItem("sessionToken");
+  sessionStorage.removeItem("sessionToken");
+  try {
+    await signOut(); // clears Convex Auth session for Google-authenticated users
+  } catch (err) {
+    console.error("Sign out error:", err);
+  }
+  window.location.href = "/";
+}, [signOut]);
+  // useEffect(() => {
+  //   const publicRoutes = ["/login", "/", "/create-account"]; // wherever OAuth might land
+  //   if (isAuthenticated && publicRoutes.includes(location.pathname)) {
+  //     window.location.href = "/dashboard";
+  //   }
+  // }, [isAuthenticated, location.pathname]);
 
- 
     useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       if (params.get("checkout") === "success") {
         setShowSuccess(true);
-        // clean the URL so refreshing doesn't re-trigger the banner
         window.history.replaceState({}, "", window.location.pathname);
-        // auto-dismiss after a few seconds
         const timer = setTimeout(() => setShowSuccess(false), 5000);
         return () => clearTimeout(timer);
       }
@@ -50,10 +69,13 @@ export default function Home() {
 
   // Get session from Convex (reactive)
   const session = useQuery(api.users.getSession, token ? { token } : "skip");
-  const userEmail = session?.email ?? "";
+  // For Google/Convex-Auth users: no sessionToken needed at all — this
+  // reactively resolves straight from the authenticated Convex Auth
+  // identity, so there's no bridging mutation and nothing to go stale.
+  const authUser = useQuery(api.users.currentUser);
+  const userEmail = session?.email ?? authUser?.email ?? "";
   const members = useQuery(api.members.getMembers,userEmail ? { userEmail } : "skip") ?? [];
 
-  //Total members
   const memberCount = useQuery(api.members.getMemberCount, userEmail ? { userEmail } : "skip") ?? 0;
   const expiringSoon  = useQuery(api.members.getExpiringSoonCount, userEmail ? { userEmail } : "skip") ?? 0;
   const monthlyRevenue = useQuery(api.members.getMonthlyRevenue,   userEmail ? { userEmail } : "skip") ?? 0;
@@ -252,16 +274,7 @@ const formatRevenue = (amount) =>
 
           {/* Footer */}
           <div className="sb-footer">
-            <button
-              className="btn-logout"
-              onClick={() => {
-                localStorage.removeItem("userId");
-                localStorage.removeItem("userEmail");
-                sessionStorage.removeItem("userId");
-                sessionStorage.removeItem("userEmail");
-                window.location.href = "/";
-              }}
-            >
+            <button className="btn-logout" onClick={handleLogout}>
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                 strokeLinecap="round" strokeLinejoin="round"> <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" /> <line x1="21" y1="12" x2="9" y2="12" />

@@ -13,13 +13,13 @@ import Pricing  from './pages/Pricing';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyTerms from './pages/PrivacyPolicy';
 // import './signup.css'
-
+import AuthRedirectWatcher from "./components/AuthRedirectWatcher";
 
 function App() {
   return (
 //  <AuthProvider>
   <div className="App">
-      {/* <Navbar /> */}
+       <AuthRedirectWatcher />
       <Routes>
         <Route path='/' element={<Funnel />}/>
         <Route path='/Login' element={<Login />}/>
